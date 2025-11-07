@@ -69,4 +69,24 @@ window.config = {
     // Could use services manager here to bring up a dialog/modal if needed.
     console.warn('test, navigate to https://ohif.org/');
   },
+  whiteLabeling: {
+    createLogoComponentFn: function (React) {
+      return React.createElement(
+        'a',
+        {
+          target: '_self',
+          rel: 'noopener noreferrer',
+          className: 'text-purple-600 line-through',
+          href: '/',
+        },
+        React.createElement('img', {
+          src: './assets/spectra-light.png',
+          className: 'h-10 w-44',
+        })
+      );
+    },
+  },
+  investigationalUseDialog: {
+    option: 'never',
+  },
 };
