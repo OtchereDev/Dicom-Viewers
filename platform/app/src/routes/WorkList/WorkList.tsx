@@ -551,19 +551,20 @@ function WorkList({
   );
 
   return (
-    <div className="flex h-screen flex-col bg-black">
+    <div className="flex h-screen flex-col bg-[#0b0f19] text-gray-100">
       <Header
         isSticky
         menuOptions={menuOptions}
         isReturnEnabled={false}
         WhiteLabeling={appConfig.whiteLabeling}
         showPatientInfo={PatientInfoVisibility.DISABLED}
+        className="border-b border-[#1e2638]/60 bg-[#101522] shadow-md"
       />
       <Onboarding />
       <InvestigationalUseDialog dialogConfiguration={appConfig?.investigationalUseDialog} />
       <div className="flex h-full flex-col overflow-y-auto">
         <ScrollArea>
-          <div className="flex grow flex-col">
+          <div className="flex grow flex-col bg-gradient-to-b from-[#0b0f19] to-[#121826] px-4 py-3">
             <StudyListFilter
               numOfStudies={pageNumber * resultsPerPage > 100 ? 101 : numOfStudies}
               filtersMeta={filtersMeta}
@@ -577,31 +578,35 @@ function WorkList({
                   ? () => dataSourceConfigurationComponent()
                   : undefined
               }
+              className="rounded-xl border border-[#1e2638]/50 bg-[#141b2a] shadow-sm"
             />
           </div>
+
           {hasStudies ? (
-            <div className="flex grow flex-col">
+            <div className="flex grow flex-col bg-[#0b0f19] text-gray-200">
               <StudyListTable
                 tableDataSource={tableDataSource.slice(offset, offsetAndTake)}
                 numOfStudies={numOfStudies}
                 querying={querying}
                 filtersMeta={filtersMeta}
+                className="rounded-xl border border-[#1e2638]/50 bg-[#101522]/80 shadow-inner"
               />
-              <div className="grow">
+              <div className="grow border-t border-[#1e2638]/40 bg-[#0f141f]">
                 <StudyListPagination
                   onChangePage={onPageNumberChange}
                   onChangePerPage={onResultsPerPageChange}
                   currentPage={pageNumber}
                   perPage={resultsPerPage}
+                  className="text-gray-400 transition-colors hover:text-cyan-400"
                 />
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center pt-48">
+            <div className="flex flex-col items-center justify-center bg-[#0b0f19] pt-48">
               {appConfig.showLoadingIndicator && isLoadingData ? (
-                <LoadingIndicatorProgress className={'h-full w-full bg-black'} />
+                <LoadingIndicatorProgress className="h-full w-full bg-[#0b0f19]" />
               ) : (
-                <EmptyStudies />
+                <EmptyStudies className="text-gray-400" />
               )}
             </div>
           )}

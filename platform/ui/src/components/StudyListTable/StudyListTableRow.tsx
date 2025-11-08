@@ -15,18 +15,18 @@ const StudyListTableRow = props => {
       >
         <td
           className={classnames('border-0 p-0', {
-            'border-secondary-light bg-primary-dark border-b': isExpanded,
+            'border-b border-[#2a3b63] bg-[#0f1a36]': isExpanded,
           })}
         >
           <div
             className={classnames(
               'w-full transition duration-300',
               {
-                'border-primary-light hover:border-secondary-light mb-2 overflow-visible rounded border':
+                'mb-2 overflow-visible rounded border border-[#3b4f7a] bg-[#141f3f] shadow-[0_0_6px_#1e3a8a80] hover:border-[#5b7ac9]':
                   isExpanded,
               },
               {
-                'border-transparent': !isExpanded,
+                'border-transparent bg-[#0b1228]': !isExpanded,
               }
             )}
           >
@@ -34,11 +34,11 @@ const StudyListTableRow = props => {
               <tbody>
                 <tr
                   className={classnames(
-                    'hover:bg-secondary-main cursor-pointer transition duration-300',
+                    'cursor-pointer text-[#e6ebff] transition duration-300 hover:bg-[#1e2b52]',
                     {
-                      'bg-primary-dark': !isExpanded,
+                      'bg-[#0f172a]': !isExpanded,
                     },
-                    { 'bg-secondary-dark': isExpanded }
+                    { 'bg-[#192b57]': isExpanded }
                   )}
                   onClick={onClickRow}
                   data-cy={clickableCY}
@@ -50,7 +50,7 @@ const StudyListTableRow = props => {
                         key={index}
                         className={classnames(
                           'truncate px-4 py-2 text-base',
-                          { 'border-secondary-light border-b': !isExpanded },
+                          { 'border-b border-[#2b3d66]': !isExpanded },
                           getGridWidthClass(gridCol) || ''
                         )}
                         style={{
@@ -58,18 +58,22 @@ const StudyListTableRow = props => {
                         }}
                         title={title}
                       >
-                        <div className="flex">
+                        <div className="flex items-center">
                           {index === 0 && (
                             <div>
                               {isExpanded ? (
-                                <Icons.ChevronOpen className="-mt-1 mr-4 inline-flex" />
+                                <Icons.ChevronOpen className="-mt-1 mr-4 inline-flex text-[#60a5fa]" />
                               ) : (
-                                <Icons.ChevronClosed className="-mt-1 mr-4 inline-flex rotate-180" />
+                                <Icons.ChevronClosed className="-mt-1 mr-4 inline-flex rotate-180 text-[#60a5fa]" />
                               )}
                             </div>
                           )}
                           <div
-                            className={classnames({ 'overflow-hidden': true }, { truncate: true })}
+                            className={classnames(
+                              { 'overflow-hidden': true },
+                              { truncate: true },
+                              'text-[#f1f5f9]'
+                            )}
                           >
                             {content}
                           </div>
@@ -79,8 +83,13 @@ const StudyListTableRow = props => {
                   })}
                 </tr>
                 {isExpanded && (
-                  <tr className="max-h-0 w-full select-text overflow-hidden bg-black">
-                    <td colSpan={row.length}>{expandedContent}</td>
+                  <tr className="max-h-0 w-full select-text overflow-hidden border-t border-[#2a3b63] bg-[#0b1121]">
+                    <td
+                      colSpan={row.length}
+                      className="p-3 text-[#dbeafe]"
+                    >
+                      {expandedContent}
+                    </td>
                   </tr>
                 )}
               </tbody>

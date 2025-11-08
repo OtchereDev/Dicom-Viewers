@@ -31,20 +31,20 @@ const StudyListFilter = ({
   return (
     <React.Fragment>
       <div>
-        <div className="bg-black">
+        <div className="border-b border-[#1b2a4a] bg-[#0d1224] shadow-md">
           <div className="container relative mx-auto flex flex-col pt-5">
             <div className="mb-5 flex flex-row justify-between">
               <div className="flex min-w-[1px] shrink flex-row items-center gap-6">
                 <Typography
                   variant="h6"
-                  className="text-white"
+                  className="text-[#e6ebff]"
                 >
                   {t('StudyList')}
                 </Typography>
                 {getDataSourceConfigurationComponent && getDataSourceConfigurationComponent()}
                 {onUploadClick && (
                   <div
-                    className="text-primary-active flex cursor-pointer items-center gap-2 self-center text-lg font-semibold"
+                    className="flex cursor-pointer items-center gap-2 self-center text-lg font-semibold text-[#1dd1a1] transition-colors hover:text-[#48e5c2]"
                     onClick={onUploadClick}
                   >
                     <Icons.Upload />
@@ -60,7 +60,7 @@ const StudyListFilter = ({
                     variant="outlined"
                     color="primaryActive"
                     border="primaryActive"
-                    className="mx-8"
+                    className="mx-8 border-[#3b82f6] text-[#93c5fd] hover:bg-[#1e3a8a]/60"
                     startIcon={<Icons.Cancel />}
                     onClick={clearFilters}
                   >
@@ -70,24 +70,25 @@ const StudyListFilter = ({
 
                 <Typography
                   variant="h6"
-                  className="mr-2"
+                  className="mr-2 text-[#a3bffa]"
                   data-cy={'num-studies'}
                 >
                   {numOfStudies > 100 ? '>100' : numOfStudies}
                 </Typography>
                 <Typography
                   variant="h6"
-                  className="text-primary-light"
+                  className="text-[#38bdf8]"
                 >
-                  {`${t('Studies')} `}
+                  {`${t('Studies')} `}
                 </Typography>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="sticky -top-1 z-10 mx-auto border-b-4 border-black">
-        <div className="bg-primary-dark pt-3 pb-3">
+
+      <div className="sticky -top-1 z-10 mx-auto border-b border-[#2a3b63]">
+        <div className="bg-[#111b36] pt-3 pb-3 shadow-lg shadow-black/30">
           <InputGroup
             inputMeta={filtersMeta}
             values={filterValues}
@@ -99,8 +100,8 @@ const StudyListFilter = ({
         </div>
         {numOfStudies > 100 && (
           <div className="container m-auto">
-            <div className="bg-primary-main rounded-b py-1 text-center text-base">
-              <p className="text-white">
+            <div className="rounded-b bg-[#22345a] py-1 text-center text-base">
+              <p className="text-[#f3f4f6]">
                 {t('Filter list to 100 studies or less to enable sorting')}
               </p>
             </div>

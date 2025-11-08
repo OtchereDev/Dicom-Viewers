@@ -27,13 +27,13 @@ const StudyListPagination = ({ onChangePage, currentPage, perPage, onChangePerPa
   };
 
   return (
-    <div className="bg-black py-10">
+    <div className="bg-[#0a163f] py-10 text-[#e8eaf0]">
       <div className="container relative m-auto px-8">
-        <div className="flex justify-between">
+        <div className="flex items-center justify-between text-[#e2e8f0]">
           <div className="flex items-center">
             <Select
               id="rows-per-page"
-              className="border-primary-main relative mr-3 w-24"
+              className="relative mr-3 w-24 border-[#2a3654] bg-[#1a2654] text-[#e8eaf0] hover:border-[#c4d82e] focus:border-[#c4d82e]"
               options={ranges}
               value={selectedRange}
               isMulti={false}
@@ -43,18 +43,20 @@ const StudyListPagination = ({ onChangePage, currentPage, perPage, onChangePerPa
               hideSelectedOptions={true}
               onChange={onSelectedRange}
             />
-            <Typography className="text-base opacity-60">{t('Results per page')}</Typography>
+            <Typography className="text-base text-[#9ca3af]">{t('Results per page')}</Typography>
           </div>
-          <div className="">
-            <div className="flex items-center">
-              <Typography className="mr-4 text-base opacity-60">
-                {t('Page')} {currentPage}
+
+          <div>
+            <div className="flex items-center space-x-4">
+              <Typography className="text-base text-[#9ca3af]">
+                {t('Page')} <span className="text-[#60a5fa]">{currentPage}</span>
               </Typography>
+
               {/* TODO Revisit design of LegacyButtonGroup later - for now use LegacyButton for its children.*/}
-              <LegacyButtonGroup>
+              <LegacyButtonGroup className="space-x-2">
                 <LegacyButton
                   size="initial"
-                  className="px-4 py-2 text-base"
+                  className="border-[#2a3654] px-4 py-2 text-base text-[#e8eaf0] hover:border-[#c4d82e] hover:text-[#c4d82e]"
                   color="translucent"
                   border="primary"
                   variant="outlined"
@@ -64,7 +66,7 @@ const StudyListPagination = ({ onChangePage, currentPage, perPage, onChangePerPa
                 </LegacyButton>
                 <LegacyButton
                   size="initial"
-                  className="py-2 px-2 text-base"
+                  className="border-[#2a3654] px-4 py-2 text-base text-[#e8eaf0] hover:border-[#c4d82e] hover:text-[#c4d82e]"
                   color="translucent"
                   border="primary"
                   variant="outlined"
@@ -74,7 +76,7 @@ const StudyListPagination = ({ onChangePage, currentPage, perPage, onChangePerPa
                 </LegacyButton>
                 <LegacyButton
                   size="initial"
-                  className="py-2 px-4 text-base"
+                  className="border-[#2a3654] px-4 py-2 text-base text-[#e8eaf0] hover:border-[#c4d82e] hover:text-[#c4d82e]"
                   color="translucent"
                   border="primary"
                   variant="outlined"
