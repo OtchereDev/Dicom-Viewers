@@ -17,9 +17,9 @@ window.config = {
       configuration: {
         friendlyName: 'DCM4CHEE Server',
         name: 'DCM4CHEE',
-        wadoUriRoot: 'http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/wado',
-        qidoRoot: 'http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs',
-        wadoRoot: 'http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoUriRoot: 'http://192.168.100.80:8080/dcm4chee-arc/aets/DCM4CHEE/wado',
+        qidoRoot: 'http://192.168.100.80:8080/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoRoot: 'http://192.168.100.80:8080/dcm4chee-arc/aets/DCM4CHEE/rs',
         qidoSupportsIncludeField: true,
         imageRendering: 'wadors',
         enableStudyLazyLoad: true,
@@ -38,21 +38,26 @@ window.config = {
         omitQuotationForMultipartRequest: true,
       },
     },
-    {
-      namespace: '@ohif/extension-default.dataSourcesModule.dicomjson',
-      sourceName: 'dicomjson',
-      configuration: {
-        friendlyName: 'dicom json',
-        name: 'json',
-      },
-    },
-    {
-      namespace: '@ohif/extension-default.dataSourcesModule.dicomlocal',
-      sourceName: 'dicomlocal',
-      configuration: {
-        friendlyName: 'dicom local',
-      },
-    },
   ],
+  whiteLabeling: {
+    createLogoComponentFn: function (React) {
+      return React.createElement(
+        'a',
+        {
+          target: '_self',
+          rel: 'noopener noreferrer',
+          className: 'text-purple-600 line-through',
+          href: '/',
+        },
+        React.createElement('img', {
+          src: './assets/spectra-light.png',
+          className: 'h-10 w-44',
+        })
+      );
+    },
+  },
+  investigationalUseDialog: {
+    option: 'never',
+  },
   studyListFunctionsEnabled: true,
 };
