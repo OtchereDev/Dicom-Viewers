@@ -125,7 +125,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       }
     >
       <div className="relative flex justify-center gap-[4px]">
-        <Toolbar buttonSection="primary" />
+        {isReferringDoctor === false && <Toolbar buttonSection="primary" />}
       </div>
     </Header>
   );
