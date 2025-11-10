@@ -19,11 +19,41 @@ const colorsByOrientation = {
 
 function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager, servicesManager) {
   const { cornerstoneViewportService } = servicesManager.services;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
+
+  // Diagnostic and segmentation tools restricted for referring doctors
+  const diagnosticTools = [
+    toolNames.Length,
+    toolNames.SegmentBidirectional,
+    toolNames.ArrowAnnotate,
+    toolNames.Bidirectional,
+    toolNames.Probe,
+    toolNames.EllipticalROI,
+    toolNames.RectangleROI,
+    toolNames.RectangleROIThreshold,
+  ];
+
+  const segmentationTools = [
+    'CircularBrush',
+    'CircularEraser',
+    'SphereBrush',
+    'SphereEraser',
+    'ThresholdCircularBrush',
+    'ThresholdSphereBrush',
+    toolNames.RectangleScissors,
+    toolNames.PaintFill,
+    toolNames.CircleScissors,
+    toolNames.SphereScissors,
+  ];
+
   const tools = {
     active: [
       {
         toolName: toolNames.WindowLevel,
-        bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        bindings: isMobile
+          ? [{ numTouchPoints: 2 }]
+          : [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
         toolName: toolNames.Pan,
@@ -35,7 +65,9 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager, se
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+        bindings: isMobile
+          ? [{ mouseButton: Enums.MouseBindings.Primary }]
+          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
       },
     ],
     passive: [
@@ -124,6 +156,7 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager, se
           getReferenceLineColor: viewportId => {
             const viewportInfo = cornerstoneViewportService.getViewportInfo(viewportId);
             const viewportOptions = viewportInfo?.viewportOptions;
+
             if (viewportOptions) {
               return (
                 colours[viewportOptions.id] ||
@@ -140,21 +173,43 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager, se
     ],
   };
 
+  // If referring doctor, disable diagnostic and segmentation tools
+  if (isReferringDoctor) {
+    const toolsToDisable = [];
+    const allRestrictedTools = [...diagnosticTools, ...segmentationTools];
+
+    tools.passive = tools.passive.filter(tool => {
+      const toolNameToCheck = tool.toolName || tool;
+      const isRestricted = allRestrictedTools.includes(toolNameToCheck);
+
+      if (isRestricted) {
+        toolsToDisable.push(tool);
+        return false;
+      }
+      return true;
+    });
+
+    tools.disabled = [...tools.disabled, ...toolsToDisable];
+  }
+
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.PT, {
     ...tools,
-    passive: [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
+    passive: isReferringDoctor
+      ? tools.passive
+      : [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
   });
-
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.CT, {
     ...tools,
-    passive: [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
+    passive: isReferringDoctor
+      ? tools.passive
+      : [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
   });
-
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.Fusion, {
     ...tools,
-    passive: [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
+    passive: isReferringDoctor
+      ? tools.passive
+      : [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
   });
-
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.default, tools);
 }
 

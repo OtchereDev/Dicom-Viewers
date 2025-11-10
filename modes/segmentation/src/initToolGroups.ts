@@ -12,10 +12,47 @@ const colorsByOrientation = {
 
 function createTools({ utilityModule, commandsManager }) {
   const { toolNames, Enums } = utilityModule.exports;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
+
+  // All segmentation and diagnostic tools restricted for referring doctors
+  const segmentationTools = [
+    'CircularBrush',
+    'CircularEraser',
+    'SphereBrush',
+    'SphereEraser',
+    'ThresholdCircularBrush',
+    'ThresholdSphereBrush',
+    'ThresholdCircularBrushDynamic',
+    'ThresholdSphereBrushDynamic',
+    'CatmullRomSplineROI',
+    'LinearSplineROI',
+    'BSplineROI',
+    toolNames.LabelmapSlicePropagation,
+    toolNames.MarkerLabelmap,
+    toolNames.RegionSegmentPlus,
+    toolNames.SegmentBidirectional,
+    toolNames.SegmentSelect,
+    toolNames.LabelMapEditWithContourTool,
+    toolNames.CircleScissors,
+    toolNames.RectangleScissors,
+    toolNames.SphereScissors,
+    toolNames.PlanarFreehandContourSegmentation,
+    toolNames.LivewireContourSegmentation,
+    toolNames.SculptorTool,
+    toolNames.PlanarFreehandROI,
+    toolNames.SplineContourSegmentation,
+    toolNames.UltrasoundDirectional,
+  ];
 
   const tools = {
     active: [
-      { toolName: toolNames.WindowLevel, bindings: [{ mouseButton: Enums.MouseBindings.Primary }] },
+      {
+        toolName: toolNames.WindowLevel,
+        bindings: isMobile
+          ? [{ numTouchPoints: 2 }]
+          : [{ mouseButton: Enums.MouseBindings.Primary }],
+      },
       { toolName: toolNames.Pan, bindings: [{ mouseButton: Enums.MouseBindings.Auxiliary }] },
       {
         toolName: toolNames.Zoom,
@@ -23,7 +60,9 @@ function createTools({ utilityModule, commandsManager }) {
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+        bindings: isMobile
+          ? [{ mouseButton: Enums.MouseBindings.Primary }]
+          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
       },
     ],
     passive: [
@@ -115,7 +154,6 @@ function createTools({ utilityModule, commandsManager }) {
       { toolName: toolNames.StackScroll },
       { toolName: toolNames.Magnify },
       { toolName: toolNames.WindowLevelRegion },
-
       { toolName: toolNames.UltrasoundDirectional },
       {
         toolName: toolNames.PlanarFreehandContourSegmentation,
@@ -157,8 +195,25 @@ function createTools({ utilityModule, commandsManager }) {
     disabled: [{ toolName: toolNames.ReferenceLines }, { toolName: toolNames.AdvancedMagnify }],
   };
 
-  const updatedTools = commandsManager.run('initializeSegmentLabelTool', { tools });
+  // If referring doctor, disable all segmentation tools
+  if (isReferringDoctor) {
+    const toolsToDisable = [];
 
+    tools.passive = tools.passive.filter(tool => {
+      const toolNameToCheck = tool.toolName || tool;
+      const isSegmentation = segmentationTools.includes(toolNameToCheck);
+
+      if (isSegmentation) {
+        toolsToDisable.push(tool);
+        return false;
+      }
+      return true;
+    });
+
+    tools.disabled = [...tools.disabled, ...toolsToDisable];
+  }
+
+  const updatedTools = commandsManager.run('initializeSegmentLabelTool', { tools });
   return updatedTools;
 }
 
@@ -166,6 +221,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
   const utilityModule = extensionManager.getModuleEntry(
     '@ohif/extension-cornerstone.utilityModule.tools'
   );
+
   const tools = createTools({ commandsManager, utilityModule });
   toolGroupService.createToolGroupAndAddTools(toolGroupId, tools);
 }
@@ -174,9 +230,11 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
   const utilityModule = extensionManager.getModuleEntry(
     '@ohif/extension-cornerstone.utilityModule.tools'
   );
+
   const servicesManager = extensionManager._servicesManager;
   const { cornerstoneViewportService } = servicesManager.services;
   const tools = createTools({ commandsManager, utilityModule });
+
   tools.disabled.push(
     {
       toolName: utilityModule.exports.toolNames.Crosshairs,
@@ -195,6 +253,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
         getReferenceLineColor: viewportId => {
           const viewportInfo = cornerstoneViewportService.getViewportInfo(viewportId);
           const viewportOptions = viewportInfo?.viewportOptions;
+
           if (viewportOptions) {
             return (
               colours[viewportOptions.id] ||
@@ -210,6 +269,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
     },
     { toolName: utilityModule.exports.toolNames.ReferenceLines }
   );
+
   toolGroupService.createToolGroupAndAddTools('mpr', tools);
 }
 

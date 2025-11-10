@@ -16,12 +16,36 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
   );
 
   const { toolNames, Enums } = utilityModule.exports;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
+
+  const diagnosticTools = [
+    toolNames.Length,
+    toolNames.ArrowAnnotate,
+    toolNames.SegmentBidirectional,
+    toolNames.Bidirectional,
+    toolNames.DragProbe,
+    toolNames.Probe,
+    toolNames.EllipticalROI,
+    toolNames.CircleROI,
+    toolNames.RectangleROI,
+    toolNames.Angle,
+    toolNames.CobbAngle,
+    toolNames.CalibrationLine,
+    toolNames.PlanarFreehandContourSegmentation,
+    toolNames.UltrasoundDirectional,
+    toolNames.PlanarFreehandROI,
+    toolNames.SplineROI,
+    toolNames.LivewireContour,
+  ];
 
   const tools = {
     active: [
       {
         toolName: toolNames.WindowLevel,
-        bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        bindings: isMobile
+          ? [{ numTouchPoints: 2 }]
+          : [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
         toolName: toolNames.Pan,
@@ -33,7 +57,9 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+        bindings: isMobile
+          ? [{ mouseButton: Enums.MouseBindings.Primary }]
+          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
       },
     ],
     passive: [
@@ -82,10 +108,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
       { toolName: toolNames.LivewireContour },
       { toolName: toolNames.WindowLevelRegion },
     ],
-    enabled: [
-      { toolName: toolNames.ImageOverlayViewer },
-      { toolName: toolNames.ReferenceLines },
-    ],
+    enabled: [{ toolName: toolNames.ImageOverlayViewer }, { toolName: toolNames.ReferenceLines }],
     disabled: [
       {
         toolName: toolNames.AdvancedMagnify,
@@ -93,8 +116,25 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
     ],
   };
 
-  const updatedTools = commandsManager.run('initializeSegmentLabelTool', { tools });
+  // If referring doctor, disable diagnostic tools
+  if (isReferringDoctor) {
+    const toolsToDisable = [];
 
+    tools.passive = tools.passive.filter(tool => {
+      const toolNameToCheck = tool.toolName || tool;
+      const isDiagnostic = diagnosticTools.includes(toolNameToCheck);
+
+      if (isDiagnostic) {
+        toolsToDisable.push(tool);
+        return false;
+      }
+      return true;
+    });
+
+    tools.disabled = [...tools.disabled, ...toolsToDisable];
+  }
+
+  const updatedTools = commandsManager.run('initializeSegmentLabelTool', { tools });
   toolGroupService.createToolGroupAndAddTools(toolGroupId, updatedTools);
 }
 
@@ -113,36 +153,40 @@ function initSRToolGroup(extensionManager, toolGroupService) {
 
   const { toolNames: SRToolNames } = SRUtilityModule.exports;
   const { toolNames, Enums } = CS3DUtilityModule.exports;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
+
+  const srDiagnosticTools = [
+    SRToolNames.SRLength,
+    SRToolNames.SRArrowAnnotate,
+    SRToolNames.SRBidirectional,
+    SRToolNames.SREllipticalROI,
+    SRToolNames.SRCircleROI,
+    SRToolNames.SRPlanarFreehandROI,
+    SRToolNames.SRRectangleROI,
+  ];
+
   const tools = {
     active: [
       {
         toolName: toolNames.WindowLevel,
-        bindings: [
-          {
-            mouseButton: Enums.MouseBindings.Primary,
-          },
-        ],
+        bindings: isMobile
+          ? [{ numTouchPoints: 2 }]
+          : [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
         toolName: toolNames.Pan,
-        bindings: [
-          {
-            mouseButton: Enums.MouseBindings.Auxiliary,
-          },
-        ],
+        bindings: [{ mouseButton: Enums.MouseBindings.Auxiliary }],
       },
       {
         toolName: toolNames.Zoom,
-        bindings: [
-          {
-            mouseButton: Enums.MouseBindings.Secondary,
-          },
-          { numTouchPoints: 2 },
-        ],
+        bindings: [{ mouseButton: Enums.MouseBindings.Secondary }, { numTouchPoints: 2 }],
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+        bindings: isMobile
+          ? [{ mouseButton: Enums.MouseBindings.Primary }]
+          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
       },
     ],
     passive: [
@@ -160,8 +204,26 @@ function initSRToolGroup(extensionManager, toolGroupService) {
         toolName: SRToolNames.DICOMSRDisplay,
       },
     ],
-    // disabled
+    disabled: [],
   };
+
+  // If referring doctor, disable SR diagnostic tools
+  if (isReferringDoctor) {
+    const toolsToDisable = [];
+
+    tools.passive = tools.passive.filter(tool => {
+      const toolNameToCheck = tool.toolName || tool;
+      const isDiagnostic = srDiagnosticTools.includes(toolNameToCheck);
+
+      if (isDiagnostic) {
+        toolsToDisable.push(tool);
+        return false;
+      }
+      return true;
+    });
+
+    tools.disabled = [...tools.disabled, ...toolsToDisable];
+  }
 
   const toolGroupId = 'SRToolGroup';
   toolGroupService.createToolGroupAndAddTools(toolGroupId, tools);
@@ -174,14 +236,34 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
 
   const serviceManager = extensionManager._servicesManager;
   const { cornerstoneViewportService } = serviceManager.services;
-
   const { toolNames, Enums } = utilityModule.exports;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
+
+  const diagnosticTools = [
+    toolNames.Length,
+    toolNames.ArrowAnnotate,
+    toolNames.Bidirectional,
+    toolNames.DragProbe,
+    toolNames.Probe,
+    toolNames.EllipticalROI,
+    toolNames.CircleROI,
+    toolNames.RectangleROI,
+    toolNames.Angle,
+    toolNames.CobbAngle,
+    toolNames.PlanarFreehandROI,
+    toolNames.SplineROI,
+    toolNames.LivewireContour,
+    toolNames.PlanarFreehandContourSegmentation,
+  ];
 
   const tools = {
     active: [
       {
         toolName: toolNames.WindowLevel,
-        bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        bindings: isMobile
+          ? [{ numTouchPoints: 2 }]
+          : [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
         toolName: toolNames.Pan,
@@ -193,7 +275,9 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+        bindings: isMobile
+          ? [{ mouseButton: Enums.MouseBindings.Primary }]
+          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
       },
     ],
     passive: [
@@ -254,6 +338,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
           getReferenceLineColor: viewportId => {
             const viewportInfo = cornerstoneViewportService.getViewportInfo(viewportId);
             const viewportOptions = viewportInfo?.viewportOptions;
+
             if (viewportOptions) {
               return (
                 colours[viewportOptions.id] ||
@@ -274,8 +359,27 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
     ],
   };
 
+  // If referring doctor, disable diagnostic tools
+  if (isReferringDoctor) {
+    const toolsToDisable = [];
+
+    tools.passive = tools.passive.filter(tool => {
+      const toolNameToCheck = tool.toolName || tool;
+      const isDiagnostic = diagnosticTools.includes(toolNameToCheck);
+
+      if (isDiagnostic) {
+        toolsToDisable.push(tool);
+        return false;
+      }
+      return true;
+    });
+
+    tools.disabled = [...tools.disabled, ...toolsToDisable];
+  }
+
   toolGroupService.createToolGroupAndAddTools('mpr', tools);
 }
+
 function initVolume3DToolGroup(extensionManager, toolGroupService) {
   const utilityModule = extensionManager.getModuleEntry(
     '@ohif/extension-cornerstone.utilityModule.tools'

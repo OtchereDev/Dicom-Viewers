@@ -7,11 +7,42 @@ export const toolGroupIds = {
 };
 
 function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  // Check if user is a referring doctor (read-only mode)
+  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
+
+  // Diagnostic/measurement tools that should be disabled for referring doctors
+  const diagnosticTools = [
+    toolNames.Length,
+    toolNames.SegmentBidirectional,
+    toolNames.ArrowAnnotate,
+    toolNames.Bidirectional,
+    toolNames.DragProbe,
+    toolNames.Probe,
+    toolNames.EllipticalROI,
+    toolNames.RectangleROI,
+    toolNames.Angle,
+    toolNames.CobbAngle,
+  ];
+
+  // Brush/Segmentation tools that should be disabled for referring doctors
+  const brushTools = [
+    'CircularBrush',
+    'CircularEraser',
+    'SphereBrush',
+    'SphereEraser',
+    'ThresholdCircularBrush',
+    'ThresholdSphereBrush',
+    'ThresholdCircularBrushDynamic',
+  ];
+
   const tools = {
     active: [
       {
         toolName: toolNames.WindowLevel,
-        bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        bindings: isMobile
+          ? [{ numTouchPoints: 2 }]
+          : [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
         toolName: toolNames.Pan,
@@ -23,7 +54,9 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+        bindings: isMobile
+          ? [{ mouseButton: Enums.MouseBindings.Primary }]
+          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
       },
     ],
     passive: [
@@ -103,9 +136,6 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
         parentTool: 'Brush',
         configuration: {
           activeStrategy: 'THRESHOLD_INSIDE_CIRCLE',
-          // preview: {
-          //   enabled: true,
-          // },
           threshold: {
             isDynamic: true,
             dynamicRadius: 3,
@@ -127,6 +157,31 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
       },
     ],
   };
+
+  // If referring doctor, move all diagnostic tools to disabled
+  if (isReferringDoctor) {
+    // Store original passive tools that need to be disabled
+    const toolsToDisable = [];
+
+    // Filter out diagnostic tools from passive array
+    tools.passive = tools.passive.filter(tool => {
+      const toolNameToCheck = tool.toolName || tool;
+      const isDiagnostic = diagnosticTools.includes(toolNameToCheck);
+      const isBrush = brushTools.includes(toolNameToCheck);
+
+      if (isDiagnostic || isBrush) {
+        toolsToDisable.push(tool);
+        return false;
+      }
+      return true;
+    });
+
+    // Add disabled diagnostic tools (just mark them as disabled, no special config needed)
+    toolsToDisable.forEach(tool => {
+      // Simply add to disabled without overriding the array type
+      tools.disabled = [...tools.disabled, tool];
+    });
+  }
 
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.CT, tools);
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.PT, {
