@@ -34,6 +34,9 @@ function ViewerLayout({
   const { panelService, hangingProtocolService, customizationService } = servicesManager.services;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
 
+  // Detect mobile device
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   const hasPanels = useCallback(
     (side): boolean => !!panelService.getPanels(side).length,
     [panelService]
@@ -41,7 +44,8 @@ function ViewerLayout({
 
   const [hasRightPanels, setHasRightPanels] = useState(hasPanels('right'));
   const [hasLeftPanels, setHasLeftPanels] = useState(hasPanels('left'));
-  const [leftPanelClosedState, setLeftPanelClosed] = useState(leftPanelClosed);
+  // Close left panel by default on mobile, use prop value on desktop
+  const [leftPanelClosedState, setLeftPanelClosed] = useState(isMobile ? true : leftPanelClosed);
   const [rightPanelClosedState, setRightPanelClosed] = useState(rightPanelClosed);
 
   const [
@@ -53,7 +57,7 @@ function ViewerLayout({
     resizableRightPanelProps,
     onHandleDragging,
   ] = useResizablePanels(
-    leftPanelClosed,
+    isMobile ? true : leftPanelClosed, // Force closed on mobile
     setLeftPanelClosed,
     rightPanelClosed,
     setRightPanelClosed,
@@ -134,7 +138,8 @@ function ViewerLayout({
         setHasLeftPanels(hasPanels('left'));
         setHasRightPanels(hasPanels('right'));
         if (options?.leftPanelClosed !== undefined) {
-          setLeftPanelClosed(options.leftPanelClosed);
+          // On mobile, ignore external attempts to open left panel
+          setLeftPanelClosed(isMobile ? true : options.leftPanelClosed);
         }
         if (options?.rightPanelClosed !== undefined) {
           setRightPanelClosed(options.rightPanelClosed);
@@ -145,9 +150,10 @@ function ViewerLayout({
     return () => {
       unsubscribe();
     };
-  }, [panelService, hasPanels]);
+  }, [panelService, hasPanels, isMobile]);
 
   const viewportComponents = viewports.map(getViewportComponentData);
+  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   return (
     <div>
@@ -165,7 +171,7 @@ function ViewerLayout({
           {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-black" />}
           <ResizablePanelGroup {...resizablePanelGroupProps}>
             {/* LEFT SIDEPANELS */}
-            {hasLeftPanels ? (
+            {hasLeftPanels && !isMobile ? (
               <>
                 <ResizablePanel {...resizableLeftPanelProps}>
                   <SidePanelWithServices
@@ -197,7 +203,7 @@ function ViewerLayout({
                 </div>
               </div>
             </ResizablePanel>
-            {hasRightPanels ? (
+            {hasRightPanels && !isReferringDoctor ? (
               <>
                 <ResizableHandle
                   onDragging={onHandleDragging}
