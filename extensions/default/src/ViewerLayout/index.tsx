@@ -171,7 +171,7 @@ function ViewerLayout({
           {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-black" />}
           <ResizablePanelGroup {...resizablePanelGroupProps}>
             {/* LEFT SIDEPANELS */}
-            {hasLeftPanels && !isMobile ? (
+            {hasLeftPanels ? (
               <>
                 <ResizablePanel {...resizableLeftPanelProps}>
                   <SidePanelWithServices
@@ -203,7 +203,7 @@ function ViewerLayout({
                 </div>
               </div>
             </ResizablePanel>
-            {hasRightPanels && !isReferringDoctor ? (
+            {hasRightPanels && !isMobile && !isReferringDoctor ? (
               <>
                 <ResizableHandle
                   onDragging={onHandleDragging}

@@ -14,6 +14,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
   const { servicesManager, extensionManager, commandsManager } = useSystem();
   const { customizationService } = servicesManager.services;
   const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -125,7 +126,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       }
     >
       <div className="relative flex justify-center gap-[4px]">
-        {isReferringDoctor === false && <Toolbar buttonSection="primary" />}
+        {!isReferringDoctor && !isMobile && <Toolbar buttonSection="primary" />}
       </div>
     </Header>
   );
