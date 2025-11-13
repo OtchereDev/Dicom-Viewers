@@ -43,9 +43,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
     active: [
       {
         toolName: toolNames.WindowLevel,
-        bindings: isMobile
-          ? [{ numTouchPoints: 2 }]
-          : [{ mouseButton: Enums.MouseBindings.Primary }],
+        bindings: isMobile ? [] : [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
         toolName: toolNames.Pan,
@@ -59,7 +57,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
         toolName: toolNames.StackScroll,
         bindings: isMobile
           ? [{ mouseButton: Enums.MouseBindings.Primary }]
-          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+          : [{ mouseButton: Enums.MouseBindings.Wheel }],
       },
     ],
     passive: [
@@ -107,6 +105,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
       { toolName: toolNames.SplineROI },
       { toolName: toolNames.LivewireContour },
       { toolName: toolNames.WindowLevelRegion },
+      { toolName: toolNames.WindowLevel },
     ],
     enabled: [{ toolName: toolNames.ImageOverlayViewer }, { toolName: toolNames.ReferenceLines }],
     disabled: [
@@ -170,9 +169,7 @@ function initSRToolGroup(extensionManager, toolGroupService) {
     active: [
       {
         toolName: toolNames.WindowLevel,
-        bindings: isMobile
-          ? [{ numTouchPoints: 2 }]
-          : [{ mouseButton: Enums.MouseBindings.Primary }],
+        bindings: isMobile ? [] : [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
         toolName: toolNames.Pan,
@@ -186,7 +183,7 @@ function initSRToolGroup(extensionManager, toolGroupService) {
         toolName: toolNames.StackScroll,
         bindings: isMobile
           ? [{ mouseButton: Enums.MouseBindings.Primary }]
-          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+          : [{ mouseButton: Enums.MouseBindings.Wheel }],
       },
     ],
     passive: [
@@ -198,6 +195,7 @@ function initSRToolGroup(extensionManager, toolGroupService) {
       { toolName: SRToolNames.SRPlanarFreehandROI },
       { toolName: SRToolNames.SRRectangleROI },
       { toolName: toolNames.WindowLevelRegion },
+      { toolName: toolNames.WindowLevel },
     ],
     enabled: [
       {
@@ -261,9 +259,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
     active: [
       {
         toolName: toolNames.WindowLevel,
-        bindings: isMobile
-          ? [{ numTouchPoints: 2 }]
-          : [{ mouseButton: Enums.MouseBindings.Primary }],
+        bindings: isMobile ? [] : [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
         toolName: toolNames.Pan,
@@ -277,7 +273,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
         toolName: toolNames.StackScroll,
         bindings: isMobile
           ? [{ mouseButton: Enums.MouseBindings.Primary }]
-          : [{ mouseButton: Enums.MouseBindings.Wheel }, { numTouchPoints: 3 }],
+          : [{ mouseButton: Enums.MouseBindings.Wheel }],
       },
     ],
     passive: [
@@ -319,6 +315,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
           displayOnePointAsCrosshairs: true,
         },
       },
+      { toolName: toolNames.WindowLevel },
     ],
     disabled: [
       {
