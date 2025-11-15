@@ -55,9 +55,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: isMobile
-          ? [{ mouseButton: Enums.MouseBindings.Primary }]
-          : [{ mouseButton: Enums.MouseBindings.Wheel }],
+        bindings: isMobile ? [{ numTouchPoints: 1 }] : [{ mouseButton: Enums.MouseBindings.Wheel }],
       },
     ],
     passive: [
@@ -181,9 +179,7 @@ function initSRToolGroup(extensionManager, toolGroupService) {
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: isMobile
-          ? [{ mouseButton: Enums.MouseBindings.Primary }]
-          : [{ mouseButton: Enums.MouseBindings.Wheel }],
+        bindings: isMobile ? [{ numTouchPoints: 1 }] : [{ mouseButton: Enums.MouseBindings.Wheel }],
       },
     ],
     passive: [
@@ -271,9 +267,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
       },
       {
         toolName: toolNames.StackScroll,
-        bindings: isMobile
-          ? [{ mouseButton: Enums.MouseBindings.Primary }]
-          : [{ mouseButton: Enums.MouseBindings.Wheel }],
+        bindings: isMobile ? [{ numTouchPoints: 1 }] : [{ mouseButton: Enums.MouseBindings.Wheel }],
       },
     ],
     passive: [

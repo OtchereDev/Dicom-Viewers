@@ -42,7 +42,7 @@ const StudyListFilter = ({
                   {t('StudyList')}
                 </Typography>
                 {getDataSourceConfigurationComponent && getDataSourceConfigurationComponent()}
-                {onUploadClick && (
+                {/* {onUploadClick && (
                   <div
                     className="flex cursor-pointer items-center gap-2 self-center text-lg font-semibold text-[#1dd1a1] transition-colors hover:text-[#48e5c2]"
                     onClick={onUploadClick}
@@ -50,7 +50,7 @@ const StudyListFilter = ({
                     <Icons.Upload />
                     <span>{t('Upload')}</span>
                   </div>
-                )}
+                )} */}
               </div>
               <div className="flex h-[34px] flex-row items-center">
                 {/* TODO revisit the completely rounded style of button used for clearing the study list filter - for now use LegacyButton*/}

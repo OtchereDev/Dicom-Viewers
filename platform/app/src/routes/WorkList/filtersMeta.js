@@ -1,5 +1,9 @@
 import i18n from 'i18next';
 
+const isMobile =
+  typeof navigator !== 'undefined' &&
+  /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
 const filtersMeta = [
   {
     name: 'patientName',
@@ -126,4 +130,8 @@ const filtersMeta = [
   },
 ];
 
-export default filtersMeta;
+const filteredFilters = isMobile
+  ? filtersMeta.filter(f => ['patientName', 'studyDate', 'modalities'].includes(f.name))
+  : filtersMeta;
+
+export default filteredFilters;
