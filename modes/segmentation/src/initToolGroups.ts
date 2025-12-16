@@ -15,7 +15,6 @@ const colorsByOrientation = {
 function createTools({ utilityModule, commandsManager }) {
   const { toolNames, Enums } = utilityModule.exports;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   // All segmentation and diagnostic tools restricted for referring doctors
   const segmentationTools = [
@@ -214,7 +213,7 @@ function createTools({ utilityModule, commandsManager }) {
   };
 
   // If referring doctor, disable all segmentation tools
-  if (isReferringDoctor) {
+  if (isMobile) {
     const toolsToDisable = [];
 
     tools.passive = tools.passive.filter(tool => {

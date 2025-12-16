@@ -13,7 +13,7 @@ import { Types } from '@ohif/core';
 function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }>) {
   const { servicesManager, extensionManager, commandsManager } = useSystem();
   const { customizationService } = servicesManager.services;
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
+
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       }
       UndoRedo={
         <div className="text-primary flex cursor-pointer items-center">
-          {isReferringDoctor === false && (
+          {!isMobile && (
             <>
               <Button
                 variant="ghost"
@@ -126,7 +126,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       }
     >
       <div className="relative flex justify-center gap-[4px]">
-        {!isReferringDoctor && !isMobile && <Toolbar buttonSection="primary" />}
+        {!isMobile && <Toolbar buttonSection="primary" />}
       </div>
     </Header>
   );

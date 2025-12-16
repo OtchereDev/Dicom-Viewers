@@ -153,7 +153,6 @@ function ViewerLayout({
   }, [panelService, hasPanels, isMobile]);
 
   const viewportComponents = viewports.map(getViewportComponentData);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   return (
     <div>
@@ -203,7 +202,7 @@ function ViewerLayout({
                 </div>
               </div>
             </ResizablePanel>
-            {hasRightPanels && !isMobile && !isReferringDoctor ? (
+            {hasRightPanels && !isMobile ? (
               <>
                 <ResizableHandle
                   onDragging={onHandleDragging}

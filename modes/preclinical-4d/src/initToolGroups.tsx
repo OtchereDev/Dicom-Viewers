@@ -20,7 +20,6 @@ const colorsByOrientation = {
 function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager, servicesManager) {
   const { cornerstoneViewportService } = servicesManager.services;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   // Diagnostic and segmentation tools restricted for referring doctors
   const diagnosticTools = [
@@ -174,7 +173,7 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager, se
   };
 
   // If referring doctor, disable diagnostic and segmentation tools
-  if (isReferringDoctor) {
+  if (isMobile) {
     const toolsToDisable = [];
     const allRestrictedTools = [...diagnosticTools, ...segmentationTools];
 
@@ -194,19 +193,19 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager, se
 
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.PT, {
     ...tools,
-    passive: isReferringDoctor
+    passive: isMobile
       ? tools.passive
       : [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
   });
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.CT, {
     ...tools,
-    passive: isReferringDoctor
+    passive: isMobile
       ? tools.passive
       : [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
   });
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.Fusion, {
     ...tools,
-    passive: isReferringDoctor
+    passive: isMobile
       ? tools.passive
       : [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }],
   });

@@ -10,8 +10,6 @@ export const toolGroupIds = {
 
 function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  // Check if user is a referring doctor (read-only mode)
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   // Diagnostic/measurement tools that should be disabled for referring doctors
   const diagnosticTools = [
@@ -175,7 +173,7 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
   };
 
   // If referring doctor, move all diagnostic tools to disabled
-  if (isReferringDoctor) {
+  if (isMobile) {
     // Store original passive tools that need to be disabled
     const toolsToDisable = [];
 

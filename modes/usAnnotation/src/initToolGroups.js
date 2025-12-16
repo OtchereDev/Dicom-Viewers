@@ -19,7 +19,6 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
 
   const { toolNames, Enums } = utilityModule.exports;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   // Diagnostic tools restricted for referring doctors
   const diagnosticTools = [
@@ -46,7 +45,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
   const tools = {
     active: [
       {
-        toolName: isReferringDoctor ? toolNames.WindowLevel : toolNames.UltrasoundAnnotation,
+        toolName: isMobile ? toolNames.WindowLevel : toolNames.UltrasoundAnnotation,
         bindings: isMobile
           ? [{ numTouchPoints: 2 }]
           : [{ mouseButton: Enums.MouseBindings.Primary }],
@@ -122,7 +121,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
   };
 
   // If referring doctor, disable diagnostic tools
-  if (isReferringDoctor) {
+  if (isMobile) {
     const toolsToDisable = [];
 
     // Filter out diagnostic tools from passive array
@@ -160,7 +159,6 @@ function initSRToolGroup(extensionManager, toolGroupService) {
   const { toolNames: SRToolNames } = SRUtilityModule.exports;
   const { toolNames, Enums } = CS3DUtilityModule.exports;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   // SR measurement tools restricted for referring doctors
   const srDiagnosticTools = [
@@ -215,7 +213,7 @@ function initSRToolGroup(extensionManager, toolGroupService) {
   };
 
   // If referring doctor, disable SR diagnostic tools
-  if (isReferringDoctor) {
+  if (isMobile) {
     const toolsToDisable = [];
 
     tools.passive = tools.passive.filter(tool => {
@@ -245,7 +243,6 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
   const { cornerstoneViewportService } = serviceManager.services;
   const { toolNames, Enums } = utilityModule.exports;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   const diagnosticTools = [
     toolNames.Length,
@@ -367,7 +364,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
   };
 
   // If referring doctor, disable diagnostic tools
-  if (isReferringDoctor) {
+  if (isMobile) {
     const toolsToDisable = [];
 
     tools.passive = tools.passive.filter(tool => {

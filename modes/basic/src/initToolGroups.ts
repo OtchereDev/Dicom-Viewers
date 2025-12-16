@@ -17,7 +17,6 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
 
   const { toolNames, Enums } = utilityModule.exports;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   const diagnosticTools = [
     toolNames.Length,
@@ -114,7 +113,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
   };
 
   // If referring doctor, disable diagnostic tools
-  if (isReferringDoctor) {
+  if (isMobile) {
     const toolsToDisable = [];
 
     tools.passive = tools.passive.filter(tool => {
@@ -151,7 +150,6 @@ function initSRToolGroup(extensionManager, toolGroupService) {
   const { toolNames: SRToolNames } = SRUtilityModule.exports;
   const { toolNames, Enums } = CS3DUtilityModule.exports;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   const srDiagnosticTools = [
     SRToolNames.SRLength,
@@ -202,7 +200,7 @@ function initSRToolGroup(extensionManager, toolGroupService) {
   };
 
   // If referring doctor, disable SR diagnostic tools
-  if (isReferringDoctor) {
+  if (isMobile) {
     const toolsToDisable = [];
 
     tools.passive = tools.passive.filter(tool => {
@@ -232,7 +230,6 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
   const { cornerstoneViewportService } = serviceManager.services;
   const { toolNames, Enums } = utilityModule.exports;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isReferringDoctor = window.ROLE_RESTRICTIONS?.isReferringDoctor || false;
 
   const diagnosticTools = [
     toolNames.Length,
@@ -351,7 +348,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
   };
 
   // If referring doctor, disable diagnostic tools
-  if (isReferringDoctor) {
+  if (isMobile) {
     const toolsToDisable = [];
 
     tools.passive = tools.passive.filter(tool => {
