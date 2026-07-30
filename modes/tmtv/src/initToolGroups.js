@@ -1,12 +1,8 @@
+import { toolGroupIds } from '@ohif/extension-tmtv';
+
 import { MIN_SEGMENTATION_DRAWING_RADIUS, MAX_SEGMENTATION_DRAWING_RADIUS } from './constants';
 
-export const toolGroupIds = {
-  CT: 'ctToolGroup',
-  PT: 'ptToolGroup',
-  Fusion: 'fusionToolGroup',
-  MIP: 'mipToolGroup',
-  default: 'default',
-};
+export { toolGroupIds };
 
 function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -161,6 +157,9 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
     disabled: [
       {
         toolName: toolNames.Crosshairs,
+        bindings: [
+          { mouseButton: Enums.MouseBindings.Primary, modifierKey: Enums.KeyboardBindings.Shift },
+        ],
         configuration: {
           disableOnPassive: true,
           autoPan: {
@@ -239,7 +238,16 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.MIP, mipTools);
 }
 
-function initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
+/**
+ * Mode tool group setup, sharing the options-object signature used by all
+ * modes so implementations are interchangeable via the `initToolGroups` mode
+ * instance property.
+ */
+function initToolGroups({ extensionManager, toolGroupService, commandsManager }) {
+  const utilityModule = extensionManager.getModuleEntry(
+    '@ohif/extension-cornerstone.utilityModule.tools'
+  );
+  const { toolNames, Enums } = utilityModule.exports;
   _initToolGroups(toolNames, Enums, toolGroupService, commandsManager);
 }
 

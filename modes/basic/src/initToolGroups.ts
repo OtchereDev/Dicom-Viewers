@@ -90,6 +90,7 @@ function initDefaultToolGroup(extensionManager, toolGroupService, commandsManage
       { toolName: toolNames.Angle },
       { toolName: toolNames.CobbAngle },
       { toolName: toolNames.Magnify },
+      { toolName: toolNames.PlanarRotate },
       { toolName: toolNames.CalibrationLine },
       {
         toolName: toolNames.PlanarFreehandContourSegmentation,
@@ -311,6 +312,9 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
     disabled: [
       {
         toolName: toolNames.Crosshairs,
+        bindings: [
+          { mouseButton: Enums.MouseBindings.Primary, modifierKey: Enums.KeyboardBindings.Shift },
+        ],
         configuration: {
           viewportIndicators: true,
           viewportIndicatorsConfig: {
@@ -318,7 +322,6 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
             xOffset: 0.95,
             yOffset: 0.05,
           },
-          disableOnPassive: true,
           autoPan: {
             enabled: false,
             panSize: 10,
@@ -395,7 +398,12 @@ function initVolume3DToolGroup(extensionManager, toolGroupService) {
   toolGroupService.createToolGroupAndAddTools('volume3d', tools);
 }
 
-function initToolGroups(extensionManager, toolGroupService, commandsManager) {
+/**
+ * Mode tool group setup.  All modes share this options-object signature so a
+ * mode (or a `modeConfiguration`) can substitute any other mode's
+ * implementation via the `initToolGroups` instance property.
+ */
+function initToolGroups({ extensionManager, toolGroupService, commandsManager }) {
   initDefaultToolGroup(extensionManager, toolGroupService, commandsManager, 'default');
   initSRToolGroup(extensionManager, toolGroupService);
   initMPRToolGroup(extensionManager, toolGroupService, commandsManager);
