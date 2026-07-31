@@ -7,7 +7,7 @@ import { getEnabledElement as OHIFgetEnabledElement } from '../state';
 import { getViewportAdapter } from '../services/ViewportService/adapter';
 import { useSystem } from '@ohif/core/src';
 
-const { downloadUrl } = utils;
+const { downloadUrl, formatPN, formatDate } = utils;
 
 const DEFAULT_SIZE = 512;
 const MAX_TEXTURE_SIZE = 10000;
@@ -34,8 +34,14 @@ const CornerstoneViewportDownloadForm = ({
   activeViewportId: activeViewportIdProp,
 }: ViewportDownloadFormProps) => {
   const { servicesManager } = useSystem();
-  const { customizationService, cornerstoneViewportService } = servicesManager.services;
+  const {
+    customizationService,
+    cornerstoneViewportService,
+    viewportGridService,
+    displaySetService,
+  } = servicesManager.services;
   const [showAnnotations, setShowAnnotations] = useState(true);
+  const [showPatientDetails, setShowPatientDetails] = useState(true);
   const [viewportDimensions, setViewportDimensions] = useState({
     width: DEFAULT_SIZE,
     height: DEFAULT_SIZE,
@@ -45,6 +51,31 @@ const CornerstoneViewportDownloadForm = ({
     enabled: boolean;
     value: string;
   };
+
+  // Patient identifiers for the exported image. Read straight off the source
+  // viewport's display set rather than a subscription-based hook: the display
+  // sets are already loaded by the time this modal opens, so an event-driven
+  // hook would never fire and the fields would render blank.
+  const patientDetails = React.useMemo(() => {
+    const displaySetUIDs = viewportGridService.getDisplaySetsUIDsForViewport(activeViewportIdProp);
+    const displaySet = displaySetService.getDisplaySetByUID(displaySetUIDs?.[0]);
+    const instance = (displaySet?.instances?.[0] || displaySet?.instance) as
+      | Record<string, string>
+      | undefined;
+
+    if (!instance) {
+      return null;
+    }
+
+    return {
+      PatientName: instance.PatientName ? formatPN(instance.PatientName) : '',
+      PatientID: instance.PatientID || '',
+      PatientBirthDate: instance.PatientBirthDate ? formatDate(instance.PatientBirthDate) : '',
+      PatientSex: instance.PatientSex || '',
+      StudyDate: instance.StudyDate ? formatDate(instance.StudyDate) : '',
+      StudyDescription: instance.StudyDescription || '',
+    };
+  }, [activeViewportIdProp, viewportGridService, displaySetService]);
 
   const refViewportEnabledElementOHIF = OHIFgetEnabledElement(activeViewportIdProp);
   const activeViewportElement = refViewportEnabledElementOHIF?.element;
@@ -288,6 +319,9 @@ const CornerstoneViewportDownloadForm = ({
       onDownload={handleDownload}
       onCopyToClipboard={handleCopyToClipboard}
       warningState={warningState}
+      patientDetails={patientDetails}
+      showPatientDetails={showPatientDetails}
+      onPatientDetailsChange={setShowPatientDetails}
     />
   );
 };

@@ -20,7 +20,25 @@ export default {
       contentF: ({ referenceInstance }) => referenceInstance.SeriesDescription,
     },
   ],
-  'viewportOverlay.topRight': [],
+  'viewportOverlay.topRight': [
+    {
+      id: 'PatientName',
+      inheritsFrom: 'ohif.overlayItem',
+      label: '',
+      title: 'Patient name',
+      condition: ({ referenceInstance }) => referenceInstance?.PatientName,
+      contentF: ({ referenceInstance, formatters: { formatPN } }) =>
+        formatPN(referenceInstance.PatientName),
+    },
+    {
+      id: 'PatientID',
+      inheritsFrom: 'ohif.overlayItem',
+      label: '',
+      title: 'Patient ID',
+      condition: ({ referenceInstance }) => referenceInstance?.PatientID,
+      contentF: ({ referenceInstance }) => referenceInstance.PatientID,
+    },
+  ],
   'viewportOverlay.bottomLeft': [
     {
       id: 'WindowLevel',

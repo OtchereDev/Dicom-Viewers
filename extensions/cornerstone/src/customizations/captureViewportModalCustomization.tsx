@@ -18,6 +18,16 @@ interface ViewportDownloadFormNewProps {
   onDownload: (filename: string, fileType: string) => void;
   onCopyToClipboard: () => void;
   warningState: { enabled: boolean; value: string };
+  patientDetails?: {
+    PatientName: string;
+    PatientID: string;
+    PatientBirthDate: string;
+    PatientSex: string;
+    StudyDate: string;
+    StudyDescription: string;
+  } | null;
+  showPatientDetails?: boolean;
+  onPatientDetailsChange?: (show: boolean) => void;
 }
 
 function ViewportDownloadFormNew({
@@ -34,6 +44,9 @@ function ViewportDownloadFormNew({
   onDisableViewport,
   onDownload,
   onCopyToClipboard,
+  patientDetails,
+  showPatientDetails = true,
+  onPatientDetailsChange,
 }: ViewportDownloadFormNewProps) {
   const [viewportElement, setViewportElement] = useState<HTMLElement | null>(null);
   const [showWarningMessage, setShowWarningMessage] = useState(true);
@@ -66,6 +79,41 @@ function ViewportDownloadFormNew({
             data-viewport-uid={viewportId}
             ref={setViewportElement}
           >
+            {/* Burned into the exported image by html2canvas, which snapshots this
+                div. Styled inline rather than with theme tokens: html2canvas
+                resolves `hsl(var(--token))` inconsistently, and these identifiers
+                must stay legible over a grayscale study regardless of theme. */}
+            {showPatientDetails && patientDetails && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 8,
+                  zIndex: 1000,
+                  color: '#ffffff',
+                  fontSize: '12px',
+                  lineHeight: 1.35,
+                  textShadow: '0 1px 2px rgba(0,0,0,0.9)',
+                  pointerEvents: 'none',
+                  maxWidth: 'calc(100% - 16px)',
+                }}
+              >
+                {patientDetails.PatientName && (
+                  <div style={{ fontWeight: 700 }}>{patientDetails.PatientName}</div>
+                )}
+                {patientDetails.PatientID && <div>{`MRN: ${patientDetails.PatientID}`}</div>}
+                {(patientDetails.PatientBirthDate || patientDetails.PatientSex) && (
+                  <div>
+                    {[patientDetails.PatientBirthDate, patientDetails.PatientSex]
+                      .filter(Boolean)
+                      .join('  ')}
+                  </div>
+                )}
+                {patientDetails.StudyDate && <div>{patientDetails.StudyDate}</div>}
+                {patientDetails.StudyDescription && <div>{patientDetails.StudyDescription}</div>}
+              </div>
+            )}
+
             {warningState.enabled && showWarningMessage && (
               <div
                 className="text-foreground absolute left-1/2 bottom-[5px] z-[1000] -translate-x-1/2 whitespace-nowrap rounded bg-background p-3 text-xs font-bold"
@@ -126,6 +174,15 @@ function ViewportDownloadFormNew({
           >
             {t('Include annotations')}
           </ImageModal.SwitchOption>
+          {patientDetails && (
+            <ImageModal.SwitchOption
+              defaultChecked={showPatientDetails}
+              checked={showPatientDetails}
+              onCheckedChange={onPatientDetailsChange}
+            >
+              {t('Include patient details')}
+            </ImageModal.SwitchOption>
+          )}
           {warningState.enabled && (
             <ImageModal.SwitchOption
               defaultChecked={showWarningMessage}
