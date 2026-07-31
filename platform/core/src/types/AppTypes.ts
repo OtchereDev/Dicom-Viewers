@@ -151,6 +151,28 @@ declare global {
        * allowlist. Absent (the default) means `?customization=` is disabled.
        */
       customizationUrlPrefixes?: Record<string, string>;
+      /**
+       * Facility theming. Requires the theme customization module to be listed in
+       * `customizationService`, which is what mounts the theme provider.
+       *
+       *   - `default` — preset applied when the visitor has made no explicit
+       *     choice (no `?theme=` param, nothing stored). Either `'default'` for
+       *     OHIF's built-in look or the `name` of a preset.
+       *   - `presets` — additional presets defined inline, so a new facility
+       *     needs a config file rather than a code change. A preset reusing a
+       *     built-in `name` replaces it.
+       *
+       * Token values are bare HSL triplets (`'66 60% 45%'`); values containing
+       * parentheses are rejected.
+       */
+      theme?: {
+        default?: string;
+        presets?: Array<{
+          name: string;
+          label: string;
+          cssVars: { dark: Record<string, string> };
+        }>;
+      };
       extensions?: string[];
       modes?: string[];
       experimentalStudyBrowserSort?: boolean;

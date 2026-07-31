@@ -1,11 +1,11 @@
 import * as React from 'react';
 import '../themes/themes.css';
-import { themePresets } from '../themes';
+import { themePresets, ThemePreset } from '../themes';
 
 const STORAGE_KEY_THEME = 'ohif:theme';
 const STORAGE_KEY_CUSTOM_CSS = 'ohif:custom-theme-css';
 const CUSTOM_STYLE_ID = 'ohif-custom-theme';
-const VALID_THEMES = new Set(['default', 'custom', ...themePresets.map(p => p.name)]);
+const CONFIG_PRESET_STYLE_ID = 'ohif-config-theme-presets';
 
 type ActiveThemeContextType = {
   activeTheme: string;
@@ -13,13 +13,27 @@ type ActiveThemeContextType = {
   customCss: string;
   applyCustomTheme: (cssText: string) => boolean;
   clearCustomTheme: () => void;
+  /** Built-in presets merged with any supplied through app config. */
+  presets: ThemePreset[];
+  /** Theme applied when the visitor has made no explicit choice. */
+  defaultTheme: string;
 };
 
 // 'custom' is deliberately not URL-addressable: the CSS behind it lives only in
 // the visitor's own localStorage, so a ?theme=custom link cannot reproduce a look
 // and would only strand the app in a custom state with no CSS behind it.
-function isValidUrlTheme(theme: string | null): theme is string {
-  return !!theme && theme !== 'custom' && VALID_THEMES.has(theme);
+function isValidUrlTheme(theme: string | null, validThemes: Set<string>): theme is string {
+  return !!theme && theme !== 'custom' && validThemes.has(theme);
+}
+
+/**
+ * Config-supplied presets override built-ins of the same name, so a facility can
+ * retune a shipped palette without forking it.
+ */
+function mergePresets(configPresets: ThemePreset[]): ThemePreset[] {
+  const valid = configPresets.filter(p => p?.name && p?.cssVars?.dark);
+  const overridden = new Set(valid.map(p => p.name));
+  return [...themePresets.filter(p => !overridden.has(p.name)), ...valid];
 }
 
 const ActiveThemeContext = React.createContext<ActiveThemeContextType | undefined>(undefined);
@@ -95,17 +109,99 @@ function injectCustomStyles(vars: string[]) {
   style.textContent = css;
 }
 
-export function ActiveThemeProvider({ children }: { children: React.ReactNode }) {
+/**
+ * Emits a `.theme-<name>` rule per config-supplied preset so they apply through
+ * the same body-class mechanism as the presets compiled into themes.css.
+ * Token names and values are held to the same shape the custom-CSS parser
+ * enforces — bare HSL triplets, no parentheses — so a config file cannot smuggle
+ * url(...) into the document.
+ */
+function injectConfigPresetStyles(presets: ThemePreset[]) {
+  const blocks = presets
+    .map(preset => {
+      if (!/^[a-zA-Z0-9-]+$/.test(preset.name)) {
+        return '';
+      }
+
+      const decls = Object.entries(preset.cssVars.dark)
+        .filter(([token, value]) => {
+          if (!/^[a-zA-Z0-9-]+$/.test(token)) {
+            return false;
+          }
+          const v = String(value).trim();
+          return !!v && !v.includes('(') && !v.includes(')') && !v.includes(';');
+        })
+        .map(([token, value]) => `  --${token}: ${String(value).trim()};`)
+        .join('\n');
+
+      return decls ? `.theme-${preset.name} {\n${decls}\n}` : '';
+    })
+    .filter(Boolean);
+
+  let style = document.getElementById(CONFIG_PRESET_STYLE_ID) as HTMLStyleElement | null;
+
+  if (!blocks.length) {
+    style?.remove();
+    return;
+  }
+
+  if (!style) {
+    style = document.createElement('style');
+    style.id = CONFIG_PRESET_STYLE_ID;
+    document.head.appendChild(style);
+  }
+  style.textContent = blocks.join('\n\n');
+}
+
+export function ActiveThemeProvider({
+  children,
+  defaultTheme = 'default',
+  presets: configPresets = [],
+}: {
+  children: React.ReactNode;
+  /** Theme used when the visitor has no stored/URL choice. Set from app config. */
+  defaultTheme?: string;
+  /** Extra presets defined in app config; override built-ins of the same name. */
+  presets?: ThemePreset[];
+}) {
+  const validConfigPresets = React.useMemo(
+    () => configPresets.filter(p => p?.name && p?.cssVars?.dark),
+    [configPresets]
+  );
+
+  const presets = React.useMemo(() => mergePresets(validConfigPresets), [validConfigPresets]);
+
+  const validThemes = React.useMemo(
+    () => new Set(['default', 'custom', ...presets.map(p => p.name)]),
+    [presets]
+  );
+
+  // A config default naming a preset that does not exist would strand the app in
+  // an unstyled theme-* class, so fall back to the built-in look instead.
+  const resolvedDefaultTheme =
+    defaultTheme !== 'custom' && validThemes.has(defaultTheme) ? defaultTheme : 'default';
+
+  // The config-supplied rules must exist before the first theme class lands on
+  // <body>, otherwise the initial paint is unstyled. Injecting during render
+  // (rather than in an effect) keeps it ahead of the mount effect below.
+  const configStylesInjected = React.useRef(false);
+  if (typeof window !== 'undefined' && !configStylesInjected.current) {
+    configStylesInjected.current = true;
+    injectConfigPresetStyles(validConfigPresets);
+  }
+
   const [activeTheme, setActiveThemeState] = React.useState<string>(() => {
-    if (typeof window === 'undefined') return 'default';
+    if (typeof window === 'undefined') return resolvedDefaultTheme;
     const urlTheme = new URLSearchParams(window.location.search).get('theme');
-    if (isValidUrlTheme(urlTheme)) return urlTheme;
+    if (isValidUrlTheme(urlTheme, validThemes)) return urlTheme;
 
     // Validate the stored value the same way the URL param is validated — a stale
     // key (renamed preset, older build) must not become a theme-* body class.
     const stored = localStorage.getItem(STORAGE_KEY_THEME);
-    if (!stored || !VALID_THEMES.has(stored)) return 'default';
-    if (stored === 'custom' && !localStorage.getItem(STORAGE_KEY_CUSTOM_CSS)) return 'default';
+    if (!stored || !validThemes.has(stored)) return resolvedDefaultTheme;
+    if (stored === 'custom' && !localStorage.getItem(STORAGE_KEY_CUSTOM_CSS)) {
+      return resolvedDefaultTheme;
+    }
     return stored;
   });
 
@@ -114,26 +210,32 @@ export function ActiveThemeProvider({ children }: { children: React.ReactNode })
     return localStorage.getItem(STORAGE_KEY_CUSTOM_CSS) || '';
   });
 
-  const setActiveTheme = React.useCallback((theme: string) => {
-    if (!VALID_THEMES.has(theme)) return;
+  const setActiveTheme = React.useCallback(
+    (theme: string) => {
+      if (!validThemes.has(theme)) return;
 
-    setActiveThemeState(theme);
-    removeThemeClasses();
+      setActiveThemeState(theme);
+      removeThemeClasses();
 
-    if (theme !== 'default' && theme !== 'custom') {
-      document.body.classList.add(`theme-${theme}`);
-    }
+      if (theme !== 'default' && theme !== 'custom') {
+        document.body.classList.add(`theme-${theme}`);
+      }
 
-    if (theme !== 'custom') {
-      removeCustomStyleElement();
-    }
+      if (theme !== 'custom') {
+        removeCustomStyleElement();
+      }
 
-    if (theme === 'default') {
-      localStorage.removeItem(STORAGE_KEY_THEME);
-    } else {
-      localStorage.setItem(STORAGE_KEY_THEME, theme);
-    }
-  }, []);
+      // Choosing the configured default clears the override so the visitor keeps
+      // tracking app config; anything else is an explicit choice worth persisting
+      // — including 'default' when the facility default is a preset.
+      if (theme === resolvedDefaultTheme) {
+        localStorage.removeItem(STORAGE_KEY_THEME);
+      } else {
+        localStorage.setItem(STORAGE_KEY_THEME, theme);
+      }
+    },
+    [validThemes, resolvedDefaultTheme]
+  );
 
   const applyCustomTheme = React.useCallback((cssText: string): boolean => {
     const vars = parseCssVars(cssText);
@@ -156,22 +258,26 @@ export function ActiveThemeProvider({ children }: { children: React.ReactNode })
     setCustomCssState('');
     localStorage.removeItem(STORAGE_KEY_CUSTOM_CSS);
 
-    setActiveThemeState('default');
+    // Clearing returns to the facility default, not necessarily OHIF's.
+    setActiveThemeState(resolvedDefaultTheme);
     removeThemeClasses();
+    if (resolvedDefaultTheme !== 'default') {
+      document.body.classList.add(`theme-${resolvedDefaultTheme}`);
+    }
     localStorage.removeItem(STORAGE_KEY_THEME);
-  }, []);
+  }, [resolvedDefaultTheme]);
 
   // Persist URL param override to localStorage
   React.useEffect(() => {
     const urlTheme = new URLSearchParams(window.location.search).get('theme');
-    if (isValidUrlTheme(urlTheme)) {
-      if (urlTheme === 'default') {
+    if (isValidUrlTheme(urlTheme, validThemes)) {
+      if (urlTheme === resolvedDefaultTheme) {
         localStorage.removeItem(STORAGE_KEY_THEME);
       } else {
         localStorage.setItem(STORAGE_KEY_THEME, urlTheme);
       }
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Apply initial theme on mount (including custom theme re-injection on reload)
   React.useEffect(() => {
@@ -184,12 +290,30 @@ export function ActiveThemeProvider({ children }: { children: React.ReactNode })
     return () => {
       removeThemeClasses();
       removeCustomStyleElement();
+      document.getElementById(CONFIG_PRESET_STYLE_ID)?.remove();
+      configStylesInjected.current = false;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = React.useMemo(
-    () => ({ activeTheme, setActiveTheme, customCss, applyCustomTheme, clearCustomTheme }),
-    [activeTheme, setActiveTheme, customCss, applyCustomTheme, clearCustomTheme]
+    () => ({
+      activeTheme,
+      setActiveTheme,
+      customCss,
+      applyCustomTheme,
+      clearCustomTheme,
+      presets,
+      defaultTheme: resolvedDefaultTheme,
+    }),
+    [
+      activeTheme,
+      setActiveTheme,
+      customCss,
+      applyCustomTheme,
+      clearCustomTheme,
+      presets,
+      resolvedDefaultTheme,
+    ]
   );
 
   return <ActiveThemeContext.Provider value={value}>{children}</ActiveThemeContext.Provider>;

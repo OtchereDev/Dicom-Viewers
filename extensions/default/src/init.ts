@@ -1,3 +1,4 @@
+import React from 'react';
 import { DicomMetadataStore, classes } from '@ohif/core';
 import { calculateSUVScalingFactors } from '@cornerstonejs/calculate-suv';
 import { ActiveThemeProvider } from '@ohif/ui-next';
@@ -27,7 +28,16 @@ export default function init({
     );
 
   if (hasThemeModule) {
-    serviceProvidersManager.registerProvider('activeTheme', ActiveThemeProvider);
+    // The provider is instantiated by App.tsx, which only hands registered
+    // providers a `service` prop — so app config is bound here instead.
+    const themeConfig: AppTypes.Config['theme'] = (appConfig as AppTypes.Config).theme ?? {};
+    const { default: defaultTheme = 'default', presets = [] } = themeConfig;
+
+    serviceProvidersManager.registerProvider(
+      'activeTheme',
+      ({ children }: { children: React.ReactNode }) =>
+        React.createElement(ActiveThemeProvider, { defaultTheme, presets, children })
+    );
   }
   const { toolbarService, cineService, viewportGridService } = servicesManager.services;
 

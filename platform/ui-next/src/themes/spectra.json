@@ -1,0 +1,31 @@
+{
+  "name": "spectra",
+  "label": "Spectra RIS",
+  "cssVars": {
+    "dark": {
+      "highlight": "67 62% 55%",
+      "neutral": "66 12% 58%",
+      "neutral-light": "66 30% 80%",
+      "neutral-dark": "66 12% 20%",
+      "background": "0 0% 4%",
+      "foreground": "0 0% 98%",
+      "card": "0 0% 9%",
+      "card-foreground": "0 0% 98%",
+      "popover": "0 0% 11%",
+      "popover-foreground": "0 0% 98%",
+      "primary": "66 60% 45%",
+      "primary-foreground": "70 35% 8%",
+      "secondary": "66 28% 26%",
+      "secondary-foreground": "66 40% 88%",
+      "muted": "0 0% 15%",
+      "muted-foreground": "66 8% 64%",
+      "accent": "66 22% 18%",
+      "accent-foreground": "0 0% 98%",
+      "destructive": "0 65% 42%",
+      "destructive-foreground": "0 0% 98%",
+      "border": "66 12% 20%",
+      "input": "66 16% 28%",
+      "ring": "66 60% 45%"
+    }
+  }
+}

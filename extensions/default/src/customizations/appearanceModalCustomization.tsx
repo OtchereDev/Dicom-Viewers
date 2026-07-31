@@ -8,12 +8,13 @@ import {
   SelectItem,
   Button,
   useActiveTheme,
-  themePresets,
 } from '@ohif/ui-next';
 import { useTranslation } from 'react-i18next';
 
 function AppearanceModalDefault() {
-  const { activeTheme, setActiveTheme, customCss, applyCustomTheme, clearCustomTheme } =
+  // Presets come from context rather than the static export so facility presets
+  // declared in app config show up in the picker.
+  const { activeTheme, setActiveTheme, customCss, applyCustomTheme, clearCustomTheme, presets } =
     useActiveTheme();
   const { t } = useTranslation('AppearanceModal');
 
@@ -73,7 +74,7 @@ function AppearanceModalDefault() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="default">{t('Default Theme')}</SelectItem>
-                {themePresets.map(preset => (
+                {presets.map(preset => (
                   <SelectItem
                     key={preset.name}
                     value={preset.name}
