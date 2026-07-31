@@ -125,7 +125,7 @@ export default function WorkList({
   }, [isLoadingData, data]);
 
   return (
-    <div className="flex h-screen min-h-0 flex-col overflow-hidden bg-[#0b0f19] text-gray-100">
+    <div className="bg-background text-foreground flex h-screen min-h-0 flex-col overflow-hidden">
       <InvestigationalUseDialog dialogConfiguration={appConfig?.investigationalUseDialog} />
       <div className="flex h-full min-h-0 flex-col">
         <div className="flex min-h-0 flex-1 flex-col">

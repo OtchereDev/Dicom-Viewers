@@ -58,7 +58,7 @@ function Header({
         isSticky={isSticky}
         {...props}
       >
-        <div className="relative h-[48px] items-center bg-gradient-to-r from-[#0a163f] via-[#111d48] to-[#1a2654] text-white shadow-md">
+        <div className="bg-background text-foreground relative h-[48px] items-center shadow-md">
           <div className="absolute left-0 top-1/2 flex -translate-y-1/2 items-center">
             <div
               className={classNames(
@@ -68,44 +68,44 @@ function Header({
               onClick={onClickReturn}
               data-cy="return-to-work-list"
             >
-              {isReturnEnabled && <Icons.ArrowLeft className="ml-1 h-7 w-7 text-[#c4d82e]" />}
+              {isReturnEnabled && <Icons.ArrowLeft className="ml-1 h-7 w-7 text-primary" />}
               <div className="ml-2">
                 {WhiteLabeling?.createLogoComponentFn?.(React, props) || (
-                  <Icons.OHIFLogo className="text-[#c4d82e]" />
+                  <Icons.OHIFLogo className="text-primary" />
                 )}
               </div>
             </div>
           </div>
 
-          <div className="absolute top-1/2 left-[250px] h-8 -translate-y-1/2 font-medium text-[#c4d82e]">
+          <div className="absolute top-1/2 left-[250px] h-8 -translate-y-1/2 font-medium text-primary">
             {Secondary}
           </div>
 
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-            <div className="flex items-center justify-center space-x-2 text-[#f2f4f8]">
+            <div className="flex items-center justify-center space-x-2 text-foreground">
               {children}
             </div>
           </div>
 
           <div className="absolute right-0 top-1/2 flex -translate-y-1/2 select-none items-center">
             {UndoRedo}
-            <div className="mx-1.5 h-[25px] border-r border-[#2b3b6e]"></div>
+            <div className="mx-1.5 h-[25px] border-r border-border"></div>
             {PatientInfo}
-            <div className="mx-1.5 h-[25px] border-r border-[#2b3b6e]"></div>
+            <div className="mx-1.5 h-[25px] border-r border-border"></div>
             <div className="flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="mt-2 h-full w-full text-[#c4d82e] transition-colors hover:bg-[#1f2b5a] hover:text-[#e6ef70]"
+                    className="mt-2 h-full w-full text-primary transition-colors hover:bg-accent hover:text-highlight"
                   >
                     <Icons.GearSettings />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="border border-[#2b3b6e] bg-[#0e1535] text-white shadow-lg"
+                  className="border-border bg-popover text-popover-foreground border shadow-lg"
                 >
                   {menuOptions.map((option, index) => {
                     const IconComponent = option.icon
@@ -115,13 +115,13 @@ function Header({
                       <DropdownMenuItem
                         key={index}
                         onSelect={option.onClick}
-                        className="flex items-center gap-2 py-2 transition-colors hover:bg-[#1a2654] hover:text-[#c4d82e]"
+                        className="hover:bg-accent hover:text-primary flex items-center gap-2 py-2 transition-colors"
                       >
                         {IconComponent && (
                           <span className="flex h-4 w-4 items-center justify-center">
                             <Icons.ByName
                               name={option.icon}
-                              className="text-[#c4d82e]"
+                              className="text-primary"
                             />
                           </span>
                         )}
