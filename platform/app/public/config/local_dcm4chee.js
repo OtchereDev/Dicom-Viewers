@@ -9,6 +9,14 @@ window.config = {
   showCPUFallbackMessage: true,
   showLoadingIndicator: true,
   strictZSpacingForVolumeViewport: true,
+  // Mounts the theme provider; without it `theme` below is inert.
+  customizationService: ['@ohif/extension-default.customizationModule.theme'],
+  // Facility theming. Swap `default` for another preset name, or define a new
+  // preset inline under `presets` to brand a different facility without a
+  // code change. See platform/ui-next/src/themes for the shipped presets.
+  theme: {
+    default: 'spectra',
+  },
   defaultDataSourceName: 'dicomweb',
   dataSources: [
     {
