@@ -46,6 +46,7 @@ import { usePositionPresentationStore } from './stores/usePositionPresentationSt
 import { useSegmentationPresentationStore } from './stores/useSegmentationPresentationStore';
 import { imageRetrieveMetadataProvider } from '@cornerstonejs/core/utilities';
 import { initializeWebWorkerProgressHandler } from './utils/initWebWorkerProgressHandler';
+import makeVoiLutModuleProvider from './utils/voiLutModuleProvider';
 
 const { registerColormap } = csUtilities.colormap;
 
@@ -255,6 +256,8 @@ export default async function init({
     )
   ); // this provider is required for Calibration tool
   metaData.addProvider(metadataProvider.get.bind(metadataProvider), 9999);
+  // Must outrank the provider above so it can reshape what that one returns.
+  metaData.addProvider(makeVoiLutModuleProvider(metadataProvider), 10_001);
 
   /* Measurement Service */
   this.measurementServiceSource = connectToolsToMeasurementService({
@@ -315,9 +318,22 @@ export default async function init({
    * Runs error handler for failed requests.
    * @param event
    */
-  const imageLoadFailedHandler = ({ detail }) => {
-    const handler = errorHandler.getHTTPErrorHandler();
-    handler(detail.error);
+  const imageLoadFailedHandler = ({ detail }: { detail: { error: unknown } }) => {
+    // appInit overwrites getHTTPErrorHandler with one that returns undefined
+    // when the app config has no httpErrorHandler, so calling it
+    // unconditionally throws and buries the error we meant to report. Its
+    // declared `() => null` type doesn't describe that, hence the cast.
+    const handler = errorHandler.getHTTPErrorHandler() as
+      | ((error: unknown) => void)
+      | null
+      | undefined;
+
+    if (typeof handler === 'function') {
+      handler(detail.error);
+      return;
+    }
+
+    console.error('Image load failed', detail.error);
   };
 
   eventTarget.addEventListener(EVENTS.IMAGE_LOAD_FAILED, imageLoadFailedHandler);
