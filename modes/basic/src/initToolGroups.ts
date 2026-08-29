@@ -312,9 +312,14 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
     disabled: [
       {
         toolName: toolNames.Crosshairs,
-        bindings: [
-          { mouseButton: Enums.MouseBindings.Primary, modifierKey: Enums.KeyboardBindings.Shift },
-        ],
+        // Deliberately no `bindings`: Crosshairs activates on plain Primary so a
+        // single left-drag anywhere jumps the centre to the click and moves every
+        // plane at once. On a Primary+Shift binding it stays off plain Primary, and
+        // the only way to move the centre is grabbing one reference line at a time,
+        // which shifts a single plane and forces the horizontal-then-vertical drag
+        // radiologists reported. `disableOnPassive` keeps it mutually exclusive with
+        // the other Primary tools (zoom/pan/window level) rather than lingering as
+        // passive.
         configuration: {
           viewportIndicators: true,
           viewportIndicatorsConfig: {
@@ -322,6 +327,7 @@ function initMPRToolGroup(extensionManager, toolGroupService, commandsManager) {
             xOffset: 0.95,
             yOffset: 0.05,
           },
+          disableOnPassive: true,
           autoPan: {
             enabled: false,
             panSize: 10,
