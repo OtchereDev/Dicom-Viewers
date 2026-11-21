@@ -9,6 +9,7 @@ import HeaderPatientInfo from './HeaderPatientInfo';
 import { PatientInfoVisibility } from './HeaderPatientInfo/HeaderPatientInfo';
 import { preserveQueryParameters } from '@ohif/app';
 import { Types } from '@ohif/core';
+import ShareImagesModal from '../Components/ShareImagesModal';
 
 function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }>) {
   const { servicesManager, extensionManager, commandsManager } = useSystem();
@@ -117,6 +118,27 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       }
       UndoRedo={
         <div className="text-primary flex cursor-pointer items-center">
+          {appConfig.imageSharing?.endpoint && (
+            <Button
+              variant="ghost"
+              className="hover:bg-muted mr-1"
+              data-cy="share-images-btn"
+              onClick={() =>
+                show({
+                  content: ShareImagesModal,
+                  title: 'Share images',
+                  containerClassName: 'max-w-md',
+                  contentProps: {
+                    endpoint: appConfig.imageSharing.endpoint,
+                    maxDays: appConfig.imageSharing.maxDays,
+                  },
+                })
+              }
+            >
+              <Icons.Link className="mr-1" />
+              Share
+            </Button>
+          )}
           {!isMobile && (
             <>
               <Button

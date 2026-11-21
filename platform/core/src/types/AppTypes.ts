@@ -173,6 +173,17 @@ declare global {
           cssVars: { dark: Record<string, string> };
         }>;
       };
+      /**
+       * Spectra: lets this visit make share links for the open study. The gateway sets it
+       * only for a signed-in person's own visit, never for one opened through a link.
+       *
+       *   - `endpoint` — same-origin URL the share form posts to.
+       *   - `maxDays` — the longest a link may work.
+       */
+      imageSharing?: {
+        endpoint: string;
+        maxDays?: number;
+      };
       extensions?: string[];
       modes?: string[];
       experimentalStudyBrowserSort?: boolean;
