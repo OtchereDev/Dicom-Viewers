@@ -11,6 +11,15 @@ type Mode = 'days' | 'hours' | 'date';
 
 type CreatedLink = { url: string; expires_at: string; has_password: boolean };
 
+/** The study in the active viewport when Share was pressed. */
+export type StudyOnScreen = {
+  studyUID: string;
+  accessionNumber: string;
+  patientName: string;
+  description: string;
+  date: string;
+};
+
 const HOUR_MS = 60 * 60 * 1000;
 const MIN_PASSWORD = 6;
 const MAX_PASSWORD = 72;
@@ -69,10 +78,12 @@ function workOutExpiry(
 export default function ShareImagesModal({
   endpoint,
   maxDays = 30,
+  study,
   hide,
 }: {
   endpoint: string;
   maxDays?: number;
+  study: StudyOnScreen | null;
   hide: () => void;
 }) {
   const [mode, setMode] = React.useState<Mode>('days');
@@ -100,7 +111,7 @@ export default function ShareImagesModal({
     event.preventDefault();
     setShowErrors(true);
     setError('');
-    if ('error' in expiry || passwordError) {
+    if (!study || 'error' in expiry || passwordError) {
       return;
     }
     setSubmitting(true);
@@ -113,7 +124,12 @@ export default function ShareImagesModal({
           // A header a page on another site can't send, so it can't share on this visit's behalf.
           'X-Requested-With': 'spectra-viewer',
         },
-        body: JSON.stringify({ ...expiry.body, password }),
+        body: JSON.stringify({
+          ...expiry.body,
+          password,
+          study_uid: study.studyUID,
+          accession_number: study.accessionNumber,
+        }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload?.data?.url) {
@@ -147,6 +163,10 @@ export default function ShareImagesModal({
     }`;
     return (
       <div className="text-foreground flex flex-col gap-4">
+        <p className="text-sm">
+          Link to {study?.patientName || 'this study'}
+          {study?.description ? ` · ${study.description}` : ''}
+        </p>
         <p className="text-muted-foreground text-sm">
           Works until {formatExpiry(link.expires_at)}. This is the only time it's shown, so copy or
           send it now.
@@ -208,12 +228,39 @@ export default function ShareImagesModal({
     );
   }
 
+  if (!study) {
+    return (
+      <div className="text-foreground flex flex-col gap-4">
+        <p className="text-sm">
+          Click on the images you want to share, so their viewport is the active one, then press
+          Share again.
+        </p>
+        <div className="flex justify-end">
+          <Button
+            size="lg"
+            onClick={hide}
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form
       className="text-foreground flex flex-col gap-5"
       onSubmit={submit}
       noValidate
     >
+      <div className="border-input rounded border p-3">
+        <p className="text-muted-foreground text-xs">Sharing the study in the active viewport</p>
+        <p className="mt-1 text-base">{study.patientName || 'Unnamed patient'}</p>
+        <p className="text-muted-foreground text-sm">
+          {[study.description, study.date].filter(Boolean).join(' · ') || study.studyUID}
+        </p>
+      </div>
+
       <div className="flex flex-col gap-2">
         <Label>Link expires</Label>
         <p className="text-muted-foreground text-sm">Anything from 1 hour to {maxDays} days.</p>

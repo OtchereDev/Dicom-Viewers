@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Icons, useModal } from '@ohif/ui-next';
-import { useSystem } from '@ohif/core';
+import { DicomMetadataStore, useSystem, utils } from '@ohif/core';
 import { Toolbar } from '../Toolbar/Toolbar';
 import HeaderPatientInfo from './HeaderPatientInfo';
 import { PatientInfoVisibility } from './HeaderPatientInfo/HeaderPatientInfo';
@@ -53,6 +53,30 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
   const UserPreferencesModal = customizationService.getCustomization(
     'ohif.userPreferencesModal'
   ) as Types.MenuComponentCustomization;
+
+  // Spectra: the study in the active viewport is what Share shares, never the one the visit
+  // began with, as the person may have opened another since.
+  const studyOnScreen = () => {
+    const { viewportGridService, displaySetService } = servicesManager.services;
+    const { activeViewportId } = viewportGridService.getState();
+    const [displaySetUID] = activeViewportId
+      ? viewportGridService.getDisplaySetsUIDsForViewport(activeViewportId) || []
+      : [];
+    const displaySet = displaySetUID ? displaySetService.getDisplaySetByUID(displaySetUID) : null;
+    const studyUID = displaySet?.StudyInstanceUID;
+    if (!studyUID) {
+      return null;
+    }
+    const study = DicomMetadataStore.getStudy(studyUID) || {};
+    const instance = displaySet.instance || displaySet.instances?.[0] || {};
+    return {
+      studyUID,
+      accessionNumber: study.AccessionNumber || instance.AccessionNumber || '',
+      patientName: utils.formatPN(study.PatientName || instance.PatientName) || '',
+      description: study.StudyDescription || instance.StudyDescription || '',
+      date: utils.formatDate(study.StudyDate || instance.StudyDate) || '',
+    };
+  };
 
   const menuOptions = [
     {
@@ -131,6 +155,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
                   contentProps: {
                     endpoint: appConfig.imageSharing.endpoint,
                     maxDays: appConfig.imageSharing.maxDays,
+                    study: studyOnScreen(),
                   },
                 })
               }
